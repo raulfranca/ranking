@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ranking de Tudo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .card {
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .card:hover:not(.no-hover) {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        #results-list li {
+            background-color: #f9fafb;
+            border-left-width: 4px;
+        }
+        #results-list li:nth-child(1) { border-color: #f59e0b; } /* Ambar */
+        #results-list li:nth-child(2) { border-color: #a3a3a3; } /* Cinza */
+        #results-list li:nth-child(3) { border-color: #a16207; } /* Bronze */
+
+        /* Novas Animações */
+        @keyframes press-animation {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.95); }
+            100% { transform: scale(1); }
+        }
+        @keyframes fade-out-animation {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        .winner-animation {
+            animation: press-animation 0.4s ease-in-out forwards;
+        }
+        .loser-animation {
+            animation: fade-out-animation 0.4s ease-in-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 flex items-center justify-center min-h-screen">
+
+    <div class="container mx-auto p-4 max-w-4xl text-center">
+        
+        <!-- Tela Inicial -->
+        <div id="setup-screen">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">Ranking de Tudo</h1>
+            <p class="text-gray-600 mb-6">Digite ou cole uma lista de itens (um por linha) para começar a ranquear.</p>
+            <textarea id="item-list" class="w-full h-48 p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Exemplo:&#10;Pizza&#10;Hambúrguer&#10;Sushi&#10;..."></textarea>
+            <button id="start-btn" class="mt-4 w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 transition-colors shadow-lg">Começar a Ranquear</button>
+        </div>
+
+        <!-- Tela de Comparação -->
+        <div id="battle-screen" class="hidden flex flex-col justify-between min-h-[50vh]">
+            <h2 class="text-2xl font-semibold mb-2">Qual você prefere?</h2>
+            <div class="flex items-center justify-center gap-4 md:gap-8 flex-grow">
+                <button id="item-a" class="card p-8 bg-white rounded-lg border border-gray-200 text-2xl font-semibold flex items-center justify-center h-48 w-full"></button>
+                <button id="item-b" class="card p-8 bg-white rounded-lg border border-gray-200 text-2xl font-semibold flex items-center justify-center h-48 w-full"></button>
+            </div>
+             <div class="mt-6">
+                <p id="progress-text" class="text-gray-500 mb-2"></p>
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div id="progress-bar" class="bg-indigo-600 h-2.5 rounded-full transition-all duration-300 ease-out"></div>
+                </div>
+                <p class="mt-2 text-sm text-gray-500">Clique para escolher ou use as setas ⬅️ e ➡️</p>
+            </div>
+        </div>
+
+        <!-- Tela de Resultados -->
+        <div id="results-screen" class="hidden">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">Seu Ranking Final!</h2>
+            <ol id="results-list" class="space-y-2 text-left max-w-lg mx-auto mb-8">
+                <!-- Resultados serão inseridos aqui -->
+            </ol>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
+                <button id="share-list-btn" class="bg-gray-200 text-gray-800 font-bold py-3 px-4 rounded-lg hover:bg-gray-300 transition-colors">Enviar esta lista para alguém</button>
+                <button id="share-results-btn" class="bg-gray-200 text-gray-800 font-bold py-3 px-4 rounded-lg hover:bg-gray-300 transition-colors">Enviar o seu ranking para alguém</button>
+                <button id="rerank-btn" class="bg-indigo-100 text-indigo-800 font-bold py-3 px-4 rounded-lg hover:bg-indigo-200 transition-colors">Rankear esta lista de novo</button>
+                <button id="restart-btn" class="bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 transition-colors">Começar novo ranking</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Elementos da UI ---
+        const setupScreen = document.getElementById('setup-screen');
+        const battleScreen = document.getElementById('battle-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        const itemListInput = document.getElementById('item-list');
+        const startBtn = document.getElementById('start-btn');
+        const itemABtn = document.getElementById('item-a');
+        const itemBBtn = document.getElementById('item-b');
+        const resultsList = document.getElementById('results-list');
+        const progressText = document.getElementById('progress-text');
+        const currentComparisonEl = document.getElementById('current-comparison');
+        const totalComparisonsEl = document.getElementById('total-comparisons');
+        const progressBar = document.getElementById('progress-bar');
+        
+        // Botões da tela de resultados
+        const shareListBtn = document.getElementById('share-list-btn');
+        const shareResultsBtn = document.getElementById('share-results-btn');
+        const rerankBtn = document.getElementById('rerank-btn');
+        const restartBtn = document.getElementById('restart-btn');
+
+        // --- Estado do Aplicativo ---
+        let originalItems = [];
+        let sortedItems = [];
+        let comparisonCount = 0;
+        let totalComparisons = 0;
+        let resolveComparison;
+
+        // --- Lógica Principal ---
+
+        // Prepara e apresenta uma comparação
+        function presentComparison(itemA, itemB) {
+            // Garante que os botões estão visíveis e sem animações
+            [itemABtn, itemBBtn].forEach(btn => {
+                btn.style.opacity = '1';
+                btn.classList.remove('winner-animation', 'loser-animation', 'no-hover');
+            });
+
+            itemABtn.textContent = itemA;
+            itemBBtn.textContent = itemB;
+            
+            return new Promise(resolve => {
+                resolveComparison = resolve;
+                itemABtn.addEventListener('click', choiceHandler);
+                itemBBtn.addEventListener('click', choiceHandler);
+                document.addEventListener('keydown', keyHandler);
+            });
+        }
+
+        // Manipula a escolha do usuário (clique ou tecla)
+        async function choiceHandler(event) {
+            const isClick = event.type === 'click';
+            const choice = isClick ? event.currentTarget.id : (event.key === 'ArrowLeft' ? 'item-a' : 'item-b');
+            
+            const winnerBtn = (choice === 'item-a') ? itemABtn : itemBBtn;
+            const loserBtn = (choice === 'item-a') ? itemBBtn : itemABtn;
+            const chosenItem = winnerBtn.textContent;
+
+            // Remove listeners para evitar escolhas múltiplas
+            itemABtn.removeEventListener('click', choiceHandler);
+            itemBBtn.removeEventListener('click', choiceHandler);
+            document.removeEventListener('keydown', keyHandler);
+            
+            // Desabilita o hover durante a animação
+            [itemABtn, itemBBtn].forEach(btn => btn.classList.add('no-hover'));
+
+            // Aplica animações
+            winnerBtn.classList.add('winner-animation');
+            loserBtn.classList.add('loser-animation');
+            
+            // Espera a animação terminar
+            await new Promise(resolve => setTimeout(resolve, 400));
+            
+            // Resolve a promessa com o item escolhido
+            if (resolveComparison) {
+                resolveComparison(chosenItem);
+                resolveComparison = null;
+            }
+        }
+
+        // Manipula as teclas de seta
+        function keyHandler(event) {
+            if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+                choiceHandler(event);
+            }
+        }
+        
+        // --- Algoritmo de Ordenação ---
+        async function merge(left, right) {
+            const result = [];
+            let leftIndex = 0;
+            let rightIndex = 0;
+
+            while (leftIndex < left.length && rightIndex < right.length) {
+                comparisonCount++;
+                updateProgress();
+                
+                const itemA = left[leftIndex];
+                const itemB = right[rightIndex];
+                const winner = await presentComparison(itemA, itemB);
+
+                if (winner === itemA) {
+                    result.push(itemA);
+                    leftIndex++;
+                } else {
+                    result.push(itemB);
+                    rightIndex++;
+                }
+            }
+            return result.concat(left.slice(leftIndex)).concat(right.slice(rightIndex));
+        }
+
+        async function mergeSort(array) {
+            if (array.length <= 1) return array;
+            const middle = Math.floor(array.length / 2);
+            const left = array.slice(0, middle);
+            const right = array.slice(middle);
+            const sortedLeft = await mergeSort(left);
+            const sortedRight = await mergeSort(right);
+            return await merge(sortedLeft, sortedRight);
+        }
+
+        // --- Funções Auxiliares ---
+
+        // Inicia o processo de ranqueamento
+        async function startRanking(itemsToRank) {
+            comparisonCount = 0;
+            totalComparisons = calculateMaxComparisons(itemsToRank.length);
+            updateProgress();
+
+            setupScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            battleScreen.classList.remove('hidden');
+
+            sortedItems = await mergeSort([...itemsToRank]);
+            displayResults(sortedItems);
+        }
+        
+        // Calcula o número máximo de comparações
+        function calculateMaxComparisons(n) {
+            if (n <= 1) return 0;
+            const k = Math.ceil(Math.log2(n));
+            return n * k - Math.pow(2, k) + 1;
+        }
+
+        // Atualiza a UI de progresso
+        function updateProgress() {
+            const percentage = totalComparisons > 0 ? Math.round((comparisonCount / totalComparisons) * 100) : 0;
+            progressText.textContent = `Escolha ${comparisonCount} de ${totalComparisons} (${percentage}%)`;
+            progressBar.style.width = `${percentage}%`;
+        }
+
+        // Exibe a tela de resultados
+        function displayResults(finalItems) {
+            resultsList.innerHTML = '';
+            finalItems.forEach((item, index) => {
+                const li = document.createElement('li');
+                li.className = 'p-3 rounded-lg flex items-center space-x-4';
+                const rank = document.createElement('span');
+                rank.className = 'text-lg font-bold text-indigo-600 w-8 text-center';
+                rank.textContent = `${index + 1}.`;
+                const text = document.createElement('span');
+                text.className = 'text-lg';
+                text.textContent = item;
+                li.appendChild(rank);
+                li.appendChild(text);
+                resultsList.appendChild(li);
+            });
+            battleScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+        }
+        
+        // Copia texto para a área de transferência
+        function copyToClipboard(text, button) {
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = button.textContent;
+                button.textContent = 'Copiado!';
+                setTimeout(() => { button.textContent = originalText; }, 2000);
+            }).catch(err => {
+                console.error('Falha ao copiar: ', err);
+            });
+        }
+
+        // --- Event Listeners ---
+        
+        // Ao carregar a página, verifica se há uma lista na URL
+        window.addEventListener('load', () => {
+            const params = new URLSearchParams(window.location.search);
+            const listParam = params.get('list');
+            if (listParam) {
+                const itemsFromUrl = listParam.split(',').map(item => decodeURIComponent(item));
+                itemListInput.value = itemsFromUrl.join('\n');
+            }
+        });
+
+        // Botão "Começar a Ranquear"
+        startBtn.addEventListener('click', () => {
+            const rawItems = itemListInput.value.trim().split('\n');
+            originalItems = rawItems.filter(item => item.trim() !== '');
+
+            if (originalItems.length < 2) {
+                alert('Por favor, insira pelo menos dois itens para ranquear.');
+                return;
+            }
+            startRanking(originalItems);
+        });
+        
+        // Botão "Começar novo ranking"
+        restartBtn.addEventListener('click', () => {
+            resultsScreen.classList.add('hidden');
+            battleScreen.classList.add('hidden');
+            setupScreen.classList.remove('hidden');
+            itemListInput.value = '';
+            progressBar.style.width = '0%';
+            // Limpa a URL para não recarregar a mesma lista
+            window.history.pushState({}, document.title, window.location.pathname);
+        });
+
+        // Botão "Rankear esta lista de novo"
+        rerankBtn.addEventListener('click', () => {
+            startRanking(originalItems);
+        });
+
+        // Botão "Enviar esta lista para alguém"
+        shareListBtn.addEventListener('click', (e) => {
+            const encodedItems = originalItems.map(item => encodeURIComponent(item)).join(',');
+            const url = `${window.location.origin}${window.location.pathname}?list=${encodedItems}`;
+            const shareData = {
+                title: 'Rankeie esta lista!',
+                text: 'Use este link para criar o seu próprio ranking com esta lista de itens:',
+                url: url,
+            };
+
+            if (navigator.share) {
+                navigator.share(shareData).catch(err => console.log("Erro ao compartilhar:", err));
+            } else {
+                copyToClipboard(url, e.currentTarget);
+            }
+        });
+
+        // Botão "Enviar o seu ranking para alguém"
+        shareResultsBtn.addEventListener('click', (e) => {
+            const resultsText = "Meu ranking final:\n" + sortedItems.map((item, index) => `${index + 1}. ${item}`).join('\n');
+            const shareData = {
+                title: 'Meu Ranking',
+                text: resultsText,
+            };
+
+            if (navigator.share) {
+                navigator.share(shareData).catch(err => console.log("Erro ao compartilhar:", err));
+            } else {
+                copyToClipboard(resultsText, e.currentTarget);
+            }
+        });
+
+    </script>
+</body>
+</html>
