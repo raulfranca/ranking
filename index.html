@@ -18,7 +18,6 @@
             align-items: center;
             justify-content: center;
         }
-        /* Garante que a tela de resultados seja rolável se o conteúdo for grande */
         #main-container {
             width: 100%;
             max-width: 56rem; /* max-w-5xl */
@@ -36,15 +35,7 @@
             transform: translateY(-4px);
             box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
         }
-        #results-list li {
-            background-color: #f9fafb;
-            border-left-width: 4px;
-        }
-        #results-list li:nth-child(1) { border-color: #f59e0b; } /* Ambar */
-        #results-list li:nth-child(2) { border-color: #a3a3a3; } /* Cinza */
-        #results-list li:nth-child(3) { border-color: #a16207; } /* Bronze */
-
-        /* Animações */
+        
         @keyframes press-animation {
             0% { transform: scale(1); }
             50% { transform: scale(0.95); }
@@ -69,33 +60,41 @@
         <!-- Tela Inicial -->
         <div id="setup-screen">
             <h1 class="text-4xl font-bold text-gray-800 mb-2">Ranking de Tudo</h1>
-            <p class="text-gray-600 mb-6">Digite ou cole uma lista de itens (um por linha) para começar a ranquear.</p>
+            <p class="text-gray-600 mb-4">Escolha um modo de ranking e insira sua lista para começar.</p>
+            
+            <!-- Seleção de Modo -->
+            <div id="mode-selector" class="flex justify-center p-1 bg-gray-200 rounded-lg mb-4 max-w-sm mx-auto">
+                <button data-mode="simple" class="mode-btn flex-1 py-2 px-4 rounded-md text-sm font-semibold">Modo Simples</button>
+                <button data-mode="tournament" class="mode-btn flex-1 py-2 px-4 rounded-md text-sm font-semibold">Modo Torneio</button>
+            </div>
+
             <textarea id="item-list" class="w-full h-48 p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Exemplo:&#10;Pizza&#10;Hambúrguer&#10;Sushi&#10;..."></textarea>
             
             <div id="list-stats" class="text-left text-sm text-gray-500 mt-3 mx-auto max-w-md">
                 <p>Itens: <span id="item-count" class="font-semibold">0</span></p>
                 <p>Escolhas (máx.): <span id="choices-count" class="font-semibold">0</span></p>
             </div>
+            
+            <div id="error-message" class="text-red-600 font-semibold text-sm mt-2 hidden"></div>
 
             <button id="start-btn" class="mt-4 w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 transition-colors shadow-lg">Começar a Ranquear</button>
         </div>
 
         <!-- Tela de Comparação -->
         <div id="battle-screen" class="hidden flex flex-col justify-between min-h-[60vh]">
-            <h2 class="text-2xl font-semibold">Qual você prefere?</h2>
+            <h2 id="battle-title" class="text-2xl font-semibold"></h2>
             
-            <!-- Correção para botões de tamanho igual -->
             <div class="grid grid-cols-2 gap-4 my-4 flex-grow">
                 <button id="item-a" class="card p-4 bg-white rounded-lg border border-gray-200 text-2xl font-semibold grid place-items-center min-h-[12rem]"></button>
                 <button id="item-b" class="card p-4 bg-white rounded-lg border border-gray-200 text-2xl font-semibold grid place-items-center min-h-[12rem]"></button>
             </div>
+            <p class="text-sm text-gray-500 -mt-2 mb-4">Clique para escolher ou use as setas ⬅️ e ➡️</p>
 
              <div class="w-full">
                 <p id="progress-text" class="text-gray-500 mb-2"></p>
                 <div class="w-full bg-gray-200 rounded-full h-2.5">
-                    <div id="progress-bar" class="bg-indigo-600 h-2.5 rounded-full transition-all duration-300 ease-out"></div>
+                    <div id="progress-bar" class="h-2.5 rounded-full bg-indigo-600 transition-all duration-300 ease-out" style="width: 0%"></div>
                 </div>
-                <p class="mt-2 text-sm text-gray-500">Clique para escolher ou use as setas ⬅️ e ➡️</p>
                 <div class="flex gap-4 mt-4">
                     <button id="restart-battle-btn" class="flex-1 bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors text-sm">Reiniciar</button>
                     <button id="finish-early-btn" class="flex-1 bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors text-sm">Finalizar</button>
@@ -103,12 +102,11 @@
             </div>
         </div>
 
-        <!-- Tela de Resultados (agora rolável) -->
+        <!-- Tela de Resultados -->
         <div id="results-screen" class="hidden">
             <h2 class="text-3xl font-bold text-gray-800 mb-4">Seu Ranking Final!</h2>
-            <ol id="results-list" class="space-y-2 text-left max-w-lg mx-auto mb-8">
-                <!-- Resultados serão inseridos aqui -->
-            </ol>
+            <div id="results-list" class="space-y-2 text-left max-w-lg mx-auto mb-8">
+            </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
                 <button id="share-list-btn" class="bg-gray-200 text-gray-800 font-bold py-3 px-4 rounded-lg hover:bg-gray-300 transition-colors">Enviar esta lista para alguém</button>
                 <button id="share-results-btn" class="bg-gray-200 text-gray-800 font-bold py-3 px-4 rounded-lg hover:bg-gray-300 transition-colors">Enviar o seu ranking para alguém</button>
@@ -116,7 +114,6 @@
                 <button id="restart-btn" class="bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 transition-colors">Começar novo ranking</button>
             </div>
         </div>
-
     </div>
 
     <script>
@@ -128,37 +125,38 @@
         const startBtn = document.getElementById('start-btn');
         const itemABtn = document.getElementById('item-a');
         const itemBBtn = document.getElementById('item-b');
+        const battleTitle = document.getElementById('battle-title');
         const resultsList = document.getElementById('results-list');
         const progressText = document.getElementById('progress-text');
         const progressBar = document.getElementById('progress-bar');
         const listStats = document.getElementById('list-stats');
         const itemCountEl = document.getElementById('item-count');
         const choicesCountEl = document.getElementById('choices-count');
+        const errorMessageEl = document.getElementById('error-message');
+        const modeSelector = document.getElementById('mode-selector');
         const restartBattleBtn = document.getElementById('restart-battle-btn');
         const finishEarlyBtn = document.getElementById('finish-early-btn');
-        
         const shareListBtn = document.getElementById('share-list-btn');
         const shareResultsBtn = document.getElementById('share-results-btn');
         const rerankBtn = document.getElementById('rerank-btn');
         const restartBtn = document.getElementById('restart-btn');
 
         // --- Estado do Aplicativo ---
+        let currentMode = 'simple';
         let originalItems = [];
         let finalRanking = [];
         let comparisonCount = 0;
         let totalComparisons = 0;
         let resolveComparison;
         let isRankingCancelled = false;
+        let losersMap = new Map();
+        let contenders = [];
 
-        let adj = new Map();
-        let inDegree = new Map();
-
-        // --- Lógica Principal ---
+        // --- Lógica de Apresentação ---
         function presentComparison(itemA, itemB) {
-            // Correção: Garante que os botões estão perfeitamente resetados
             [itemABtn, itemBBtn].forEach(btn => {
                 btn.style.opacity = '1';
-                btn.style.transform = 'scale(1)'; // Reseta o scale explicitamente
+                btn.style.transform = 'scale(1)';
                 btn.classList.remove('winner-animation', 'loser-animation', 'no-hover');
             });
             itemABtn.textContent = itemA;
@@ -187,7 +185,9 @@
             winnerBtn.classList.add('winner-animation');
             loserBtn.classList.add('loser-animation');
             
-            recordChoice(winner, loser);
+            if (currentMode === 'tournament') {
+                losersMap.get(winner).push(loser);
+            }
             
             await new Promise(resolve => setTimeout(resolve, 400));
             
@@ -203,12 +203,96 @@
             }
         }
         
-        // --- Algoritmo de Ordenação e Lógica de Ranking ---
-        function recordChoice(winner, loser) {
-            if (adj.has(winner) && !adj.get(winner).includes(loser)) {
-                adj.get(winner).push(loser);
-                inDegree.set(loser, inDegree.get(loser) + 1);
+        // --- Algoritmos ---
+
+        // MODO TORNEIO (Repescagem de Contendores)
+        async function startContenderRanking(items) {
+            isRankingCancelled = false;
+            comparisonCount = 0;
+            totalComparisons = calculateMaxComparisons(items.length);
+            finalRanking = [];
+            losersMap.clear();
+            items.forEach(item => losersMap.set(item, []));
+            contenders = shuffle([...items]);
+            
+            updateProgress();
+            progressBar.style.width = '0%';
+            setupScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            battleScreen.classList.remove('hidden');
+            finishEarlyBtn.classList.remove('hidden'); // Mostra o botão no modo torneio
+
+            while (contenders.length > 0) {
+                if (isRankingCancelled) break;
+                
+                const rank = finalRanking.length + 1;
+                updateTournamentTitle(rank);
+
+                const winner = await runSingleElimination(contenders);
+                if (isRankingCancelled) break;
+
+                finalRanking.push([winner]);
+                contenders = losersMap.get(winner) || [];
             }
+            
+            if (isRankingCancelled) return;
+            displayResults(finalRanking);
+        }
+        
+        async function runSingleElimination(items) {
+            let currentContenders = [...items];
+            while (currentContenders.length > 1) {
+                if (isRankingCancelled) return null;
+                const nextRoundWinners = [];
+                if (currentContenders.length % 2 !== 0) {
+                    nextRoundWinners.push(currentContenders.pop());
+                }
+                for (let i = 0; i < currentContenders.length; i += 2) {
+                    if (isRankingCancelled) return null;
+                    const itemA = currentContenders[i];
+                    const itemB = currentContenders[i + 1];
+                    comparisonCount++;
+                    updateProgress();
+                    const winner = await presentComparison(itemA, itemB);
+                    if (isRankingCancelled) return null;
+                    nextRoundWinners.push(winner);
+                }
+                currentContenders = nextRoundWinners;
+            }
+            return currentContenders[0];
+        }
+
+        // MODO SIMPLES (Merge Sort)
+        async function startSimpleRanking(items) {
+            isRankingCancelled = false;
+            comparisonCount = 0;
+            totalComparisons = calculateMaxComparisons(items.length);
+            finalRanking = [];
+            
+            updateProgress();
+            progressBar.style.width = '0%';
+            setupScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            battleScreen.classList.remove('hidden');
+            battleTitle.textContent = "Qual você prefere?";
+            finishEarlyBtn.classList.add('hidden'); // Esconde o botão no modo simples
+
+            const sortedItems = await mergeSort(items);
+            if (isRankingCancelled) return;
+
+            finalRanking = sortedItems.map(item => [item]); // Formato de grupo para consistência
+            displayResults(finalRanking);
+        }
+
+        async function mergeSort(array) {
+            if (array.length <= 1 || isRankingCancelled) return array;
+            const middle = Math.floor(array.length / 2);
+            const left = array.slice(0, middle);
+            const right = array.slice(middle);
+            const sortedLeft = await mergeSort(left);
+            const sortedRight = await mergeSort(right);
+            if (isRankingCancelled) return [];
+            return await merge(sortedLeft, sortedRight);
         }
 
         async function merge(left, right) {
@@ -222,7 +306,7 @@
                 const itemA = left[leftIndex];
                 const itemB = right[rightIndex];
                 const winner = await presentComparison(itemA, itemB);
-                if (isRankingCancelled) return []; // Checa de novo após a escolha
+                if (isRankingCancelled) return [];
                 if (winner === itemA) {
                     result.push(itemA);
                     leftIndex++;
@@ -234,79 +318,18 @@
             return result.concat(left.slice(leftIndex)).concat(right.slice(rightIndex));
         }
 
-        async function mergeSort(array) {
-            if (array.length <= 1 || isRankingCancelled) return array;
-            const middle = Math.floor(array.length / 2);
-            const left = array.slice(0, middle);
-            const right = array.slice(middle);
-            const sortedLeft = await mergeSort(left);
-            const sortedRight = await mergeSort(right);
-            return await merge(sortedLeft, sortedRight);
-        }
-
-        function generatePartialRanking() {
-            const ranking = [];
-            const localInDegree = new Map(JSON.parse(JSON.stringify(Array.from(inDegree))));
-            let queue = originalItems.filter(item => localInDegree.get(item) === 0);
-            const rankedItems = new Set();
-
-            while(queue.length > 0) {
-                ranking.push(queue.sort()); // Ordena alfabeticamente os empatados
-                queue.forEach(item => rankedItems.add(item));
-                const nextQueue = [];
-                for (const node of queue) {
-                    for (const neighbor of adj.get(node) || []) {
-                        localInDegree.set(neighbor, localInDegree.get(neighbor) - 1);
-                        if (localInDegree.get(neighbor) === 0) {
-                            nextQueue.push(neighbor);
-                        }
-                    }
-                }
-                queue = nextQueue;
-            }
-            
-            const unranked = originalItems.filter(item => !rankedItems.has(item));
-            if(unranked.length > 0) {
-                ranking.push(unranked.sort()); // Ordena alfabeticamente os empatados
-            }
-
-            return ranking;
-        }
-
         // --- Funções Auxiliares ---
-        async function startRanking(itemsToRank) {
-            isRankingCancelled = false;
-            comparisonCount = 0;
-            totalComparisons = calculateMaxComparisons(itemsToRank.length);
-            
-            adj.clear();
-            inDegree.clear();
-            itemsToRank.forEach(item => {
-                adj.set(item, []);
-                inDegree.set(item, 0);
-            });
-
-            updateProgress();
-            setupScreen.classList.add('hidden');
-            resultsScreen.classList.add('hidden');
-            battleScreen.classList.remove('hidden');
-
-            await mergeSort([...itemsToRank]);
-            
-            if (!isRankingCancelled) {
-                finalRanking = generatePartialRanking();
-                displayResults(finalRanking);
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
             }
+            return array;
         }
-        
+
         function calculateMaxComparisons(n) {
             if (n <= 1) return 0;
-            const T = (n) => {
-                if (n <= 1) return 0;
-                const m1 = Math.floor(n / 2);
-                const m2 = Math.ceil(n / 2);
-                return T(m1) + T(m2) + n - 1;
-            };
+            const T = (n) => n <= 1 ? 0 : T(Math.floor(n/2)) + T(Math.ceil(n/2)) + n - 1;
             return T(n);
         }
 
@@ -318,43 +341,117 @@
         }
 
         function updateProgress() {
+            totalComparisons = parseInt(choicesCountEl.textContent);
             const percentage = totalComparisons > 0 ? Math.round((comparisonCount / totalComparisons) * 100) : 0;
             progressText.textContent = `Escolha ${comparisonCount} de ${totalComparisons} (${percentage}%)`;
             progressBar.style.width = `${percentage}%`;
+        }
+
+        function updateTournamentTitle(rank) {
+            const titles = {
+                1: "Definindo o 1º lugar... �",
+                2: "Definindo o 2º lugar... 🥈",
+                3: "Definindo o 3º lugar... 🥉",
+            };
+            battleTitle.textContent = titles[rank] || `Definindo o ${rank}º lugar...`;
         }
 
         function displayResults(ranking) {
             finalRanking = ranking;
             resultsList.innerHTML = '';
             let rankNumber = 1;
+
+            const rankBracketColors = {
+                1: 'border-yellow-400', // Gold
+                2: 'border-gray-400',   // Silver
+                3: 'border-yellow-600', // Bronze
+            };
+            const defaultBracketColor = 'border-gray-300';
+
             ranking.forEach(tiedGroup => {
-                tiedGroup.forEach(item => {
-                    const li = document.createElement('li');
-                    li.className = 'p-3 rounded-lg flex items-center space-x-4';
+                const bracketColor = rankBracketColors[rankNumber] || defaultBracketColor;
+                
+                const groupContainer = document.createElement('div');
+                groupContainer.className = `relative border-l-4 rounded-lg overflow-hidden ${bracketColor}`;
+
+                tiedGroup.sort();
+                tiedGroup.forEach((item, itemIndex) => {
+                    const itemRow = document.createElement('div');
+                    itemRow.className = 'p-3 flex items-center space-x-4 bg-gray-50';
+                    
                     const rankEl = document.createElement('span');
-                    rankEl.className = 'text-lg font-bold text-indigo-600 w-8 text-center';
-                    rankEl.textContent = `${rankNumber}.`;
+                    rankEl.className = 'text-lg font-bold text-indigo-600 w-8 text-center flex-shrink-0';
+                    
+                    if (itemIndex === 0) {
+                        rankEl.textContent = `${rankNumber}.`;
+                    } else {
+                        rankEl.innerHTML = `&nbsp;`;
+                    }
+
                     const textEl = document.createElement('span');
-                    textEl.className = 'text-lg';
+                    textEl.className = 'text-lg text-left';
                     textEl.textContent = item;
-                    li.appendChild(rankEl);
-                    li.appendChild(textEl);
-                    resultsList.appendChild(li);
+
+                    itemRow.appendChild(rankEl);
+                    itemRow.appendChild(textEl);
+                    groupContainer.appendChild(itemRow);
                 });
+
+                resultsList.appendChild(groupContainer);
                 rankNumber += tiedGroup.length;
             });
             battleScreen.classList.add('hidden');
             resultsScreen.classList.remove('hidden');
         }
         
+        function fallbackCopyTextToClipboard(text, button) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    const originalText = button.textContent;
+                    button.textContent = 'Copiado!';
+                    setTimeout(() => { button.textContent = originalText; }, 2000);
+                } else {
+                    alert('Não foi possível copiar o texto. Por favor, copie manualmente.');
+                }
+            } catch (err) {
+                alert('Não foi possível copiar o texto. Por favor, copie manualmente.');
+            }
+            document.body.removeChild(textArea);
+        }
+
         function copyToClipboard(text, button) {
-            navigator.clipboard.writeText(text).then(() => {
-                const originalText = button.textContent;
-                button.textContent = 'Copiado!';
-                setTimeout(() => { button.textContent = originalText; }, 2000);
-            }).catch(err => {
-                console.error('Falha ao copiar: ', err);
-                alert('Não foi possível copiar o texto.');
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => {
+                    const originalText = button.textContent;
+                    button.textContent = 'Copiado!';
+                    setTimeout(() => { button.textContent = originalText; }, 2000);
+                }).catch(err => {
+                    fallbackCopyTextToClipboard(text, button);
+                });
+            } else {
+                fallbackCopyTextToClipboard(text, button);
+            }
+        }
+
+        function setMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                if (btn.dataset.mode === mode) {
+                    btn.classList.add('bg-indigo-600', 'text-white');
+                    btn.classList.remove('text-gray-800');
+                } else {
+                    btn.classList.remove('bg-indigo-600', 'text-white');
+                    btn.classList.add('text-gray-800');
+                }
             });
         }
 
@@ -362,21 +459,46 @@
         window.addEventListener('load', () => {
             const params = new URLSearchParams(window.location.search);
             const listParam = params.get('list');
+            const modeParam = params.get('mode') || 'simple';
+            
             if (listParam) {
                 itemListInput.value = listParam.split(',').map(item => decodeURIComponent(item)).join('\n');
             }
+            setMode(modeParam);
             updateItemCounts();
+        });
+
+        modeSelector.addEventListener('click', (e) => {
+            if (e.target.matches('.mode-btn')) {
+                setMode(e.target.dataset.mode);
+            }
         });
 
         itemListInput.addEventListener('input', updateItemCounts);
 
         startBtn.addEventListener('click', () => {
-            originalItems = itemListInput.value.trim().split('\n').filter(item => item.trim() !== '');
-            if (originalItems.length < 2) {
-                alert('Por favor, insira pelo menos dois itens para ranquear.');
+            const items = itemListInput.value.trim().split('\n').filter(item => item.trim() !== '');
+            const uniqueItems = new Set(items);
+            
+            if (items.length !== uniqueItems.size) {
+                errorMessageEl.textContent = "Foram encontrados itens duplicados. Por favor, remova as duplicatas.";
+                errorMessageEl.classList.remove('hidden');
                 return;
             }
-            startRanking(originalItems);
+            if (items.length < 2) {
+                errorMessageEl.textContent = "Por favor, insira pelo menos dois itens para ranquear.";
+                errorMessageEl.classList.remove('hidden');
+                return;
+            }
+            
+            errorMessageEl.classList.add('hidden');
+            originalItems = items;
+
+            if (currentMode === 'simple') {
+                startSimpleRanking(originalItems);
+            } else {
+                startContenderRanking(originalItems);
+            }
         });
         
         restartBtn.addEventListener('click', () => {
@@ -384,51 +506,89 @@
             setupScreen.classList.remove('hidden');
             itemListInput.value = '';
             updateItemCounts();
+            errorMessageEl.classList.add('hidden');
             window.history.pushState({}, document.title, window.location.pathname);
         });
 
         rerankBtn.addEventListener('click', () => {
-            startRanking(originalItems);
+            if (currentMode === 'simple') {
+                startSimpleRanking(originalItems);
+            } else {
+                startContenderRanking(originalItems);
+            }
         });
 
         restartBattleBtn.addEventListener('click', () => {
             isRankingCancelled = true;
             if (resolveComparison) resolveComparison(null);
             battleScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
             setupScreen.classList.remove('hidden');
             itemListInput.value = originalItems.join('\n');
             updateItemCounts();
         });
 
         finishEarlyBtn.addEventListener('click', () => {
+            if (isRankingCancelled) return;
             isRankingCancelled = true;
+            
+            const rankedItems = finalRanking.flat();
+            const unrankedItems = originalItems.filter(item => !rankedItems.includes(item));
+            if (unrankedItems.length > 0) {
+                finalRanking.push(unrankedItems);
+            }
+            
+            displayResults(finalRanking);
             if (resolveComparison) resolveComparison(null);
-            const partialRanking = generatePartialRanking();
-            displayResults(partialRanking);
         });
 
         shareListBtn.addEventListener('click', (e) => {
-            const encodedItems = originalItems.map(item => encodeURIComponent(item)).join(',');
-            const url = `${window.location.origin}${window.location.pathname}?list=${encodedItems}`;
+            if (!Array.isArray(originalItems) || originalItems.length === 0) return;
+            const encodedItems = originalItems.map(item => encodeURIComponent(String(item))).join(',');
+            const url = `${window.location.origin}${window.location.pathname}?mode=${currentMode}&list=${encodedItems}`;
+            
             if (navigator.share) {
-                navigator.share({ title: 'Rankeie esta lista!', url: url });
+                navigator.share({ title: 'Rankeie esta lista!', url: url })
+                    .catch((error) => {
+                        if (error.name !== 'AbortError') {
+                           copyToClipboard(url, e.currentTarget);
+                        }
+                    });
             } else {
                 copyToClipboard(url, e.currentTarget);
             }
         });
 
         shareResultsBtn.addEventListener('click', (e) => {
+            if (!Array.isArray(finalRanking) || finalRanking.length === 0) return;
+
             let resultsText = "Meu ranking final:\n";
             let rankNumber = 1;
+
             finalRanking.forEach(tiedGroup => {
-                resultsText += tiedGroup.map(item => `${rankNumber}. ${item}`).join('\n') + '\n';
+                if (!Array.isArray(tiedGroup)) return;
+                const itemsText = tiedGroup.map((item, itemIndex) => {
+                    const itemStr = (item === null || item === undefined) ? '' : String(item);
+                    if (itemIndex === 0) {
+                        return `${rankNumber}. ${itemStr}`;
+                    }
+                    return `   ${itemStr}`;
+                }).join('\n');
+                resultsText += itemsText + '\n';
                 rankNumber += tiedGroup.length;
             });
 
+            const shareData = { title: 'Meu Ranking', text: resultsText.trim() };
+
             if (navigator.share) {
-                navigator.share({ title: 'Meu Ranking', text: resultsText.trim() });
+                navigator.share(shareData)
+                    .catch((error) => {
+                        if (error.name !== 'AbortError') {
+                           copyToClipboard(shareData.text, e.currentTarget);
+                        }
+                    });
             } else {
-                copyToClipboard(resultsText.trim(), e.currentTarget);
+                copyToClipboard(shareData.text, e.currentTarget);
             }
         });
     </script>
