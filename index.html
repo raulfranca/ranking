@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ranking de Tudo</title>
+    
+    <!-- PWA & SEO -->
+    <meta name="theme-color" content="#69a7b0">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="favicon.ico" sizes="any">
+    <link rel="apple-touch-icon" href="icon-192x192.png">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -59,16 +66,16 @@
         
         <!-- Tela Inicial -->
         <div id="setup-screen">
+            <img src="logo.png" alt="Logo Ranking de Tudo" class="h-24 mx-auto mb-4">
             <h1 class="text-4xl font-bold text-gray-800 mb-2">Ranking de Tudo</h1>
             <p class="text-gray-600 mb-4">Escolha um modo de ranking e insira sua lista para começar.</p>
             
-            <!-- Seleção de Modo -->
             <div id="mode-selector" class="flex justify-center p-1 bg-gray-200 rounded-lg mb-4 max-w-sm mx-auto">
                 <button data-mode="simple" class="mode-btn flex-1 py-2 px-4 rounded-md text-sm font-semibold">Modo Simples</button>
                 <button data-mode="tournament" class="mode-btn flex-1 py-2 px-4 rounded-md text-sm font-semibold">Modo Torneio</button>
             </div>
 
-            <textarea id="item-list" class="w-full h-48 p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Exemplo:&#10;Pizza&#10;Hambúrguer&#10;Sushi&#10;..."></textarea>
+            <textarea id="item-list" class="w-full h-48 p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-[#69a7b0] focus:border-[#69a7b0]" placeholder="Exemplo:&#10;Pizza&#10;Hambúrguer&#10;Sushi&#10;..."></textarea>
             
             <div id="list-stats" class="text-left text-sm text-gray-500 mt-3 mx-auto max-w-md">
                 <p>Itens: <span id="item-count" class="font-semibold">0</span></p>
@@ -77,7 +84,7 @@
             
             <div id="error-message" class="text-red-600 font-semibold text-sm mt-2 hidden"></div>
 
-            <button id="start-btn" class="mt-4 w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 transition-colors shadow-lg">Começar a Ranquear</button>
+            <button id="start-btn" class="mt-4 w-full bg-[#e55f27] text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 transition-opacity shadow-lg">Começar a Ranquear</button>
         </div>
 
         <!-- Tela de Comparação -->
@@ -93,7 +100,7 @@
              <div class="w-full">
                 <p id="progress-text" class="text-gray-500 mb-2"></p>
                 <div class="w-full bg-gray-200 rounded-full h-2.5">
-                    <div id="progress-bar" class="h-2.5 rounded-full bg-indigo-600 transition-all duration-300 ease-out" style="width: 0%"></div>
+                    <div id="progress-bar" class="h-2.5 rounded-full bg-[#69a7b0] transition-all duration-300 ease-out" style="width: 0%"></div>
                 </div>
                 <div class="flex gap-4 mt-4">
                     <button id="restart-battle-btn" class="flex-1 bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors text-sm">Reiniciar</button>
@@ -104,19 +111,31 @@
 
         <!-- Tela de Resultados -->
         <div id="results-screen" class="hidden">
+            <img src="logo.png" alt="Logo Ranking de Tudo" class="h-24 mx-auto mb-4">
             <h2 class="text-3xl font-bold text-gray-800 mb-4">Seu Ranking Final!</h2>
             <div id="results-list" class="space-y-2 text-left max-w-lg mx-auto mb-8">
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
-                <button id="share-list-btn" class="bg-gray-200 text-gray-800 font-bold py-3 px-4 rounded-lg hover:bg-gray-300 transition-colors">Enviar esta lista para alguém</button>
-                <button id="share-results-btn" class="bg-gray-200 text-gray-800 font-bold py-3 px-4 rounded-lg hover:bg-gray-300 transition-colors">Enviar o seu ranking para alguém</button>
-                <button id="rerank-btn" class="bg-indigo-100 text-indigo-800 font-bold py-3 px-4 rounded-lg hover:bg-indigo-200 transition-colors">Rankear esta lista de novo</button>
-                <button id="restart-btn" class="bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 transition-colors">Começar novo ranking</button>
+                <button id="share-list-btn" class="bg-[#f3b640] text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 transition-opacity">Mande para alguém ranquear</button>
+                <button id="share-results-btn" class="bg-[#f3b640] text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 transition-opacity">Compartilhar meu resultado</button>
+                <button id="rerank-btn" class="bg-[#69a7b0] bg-opacity-20 text-[#69a7b0] font-bold py-3 px-4 rounded-lg hover:bg-opacity-30 transition-all">Refazer este ranking</button>
+                <button id="restart-btn" class="bg-[#e55f27] text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 transition-opacity">Começar novo ranking</button>
             </div>
         </div>
     </div>
 
     <script>
+        // --- Service Worker Registration ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/ranking/sw.js').then(registration => {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                }, err => {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+
         // --- Elementos da UI ---
         const setupScreen = document.getElementById('setup-screen');
         const battleScreen = document.getElementById('battle-screen');
@@ -204,8 +223,6 @@
         }
         
         // --- Algoritmos ---
-
-        // MODO TORNEIO (Repescagem de Contendores)
         async function startContenderRanking(items) {
             isRankingCancelled = false;
             comparisonCount = 0;
@@ -220,7 +237,7 @@
             setupScreen.classList.add('hidden');
             resultsScreen.classList.add('hidden');
             battleScreen.classList.remove('hidden');
-            finishEarlyBtn.classList.remove('hidden'); // Mostra o botão no modo torneio
+            finishEarlyBtn.classList.remove('hidden');
 
             while (contenders.length > 0) {
                 if (isRankingCancelled) break;
@@ -262,7 +279,6 @@
             return currentContenders[0];
         }
 
-        // MODO SIMPLES (Merge Sort)
         async function startSimpleRanking(items) {
             isRankingCancelled = false;
             comparisonCount = 0;
@@ -275,12 +291,12 @@
             resultsScreen.classList.add('hidden');
             battleScreen.classList.remove('hidden');
             battleTitle.textContent = "Qual você prefere?";
-            finishEarlyBtn.classList.add('hidden'); // Esconde o botão no modo simples
+            finishEarlyBtn.classList.add('hidden');
 
             const sortedItems = await mergeSort(items);
             if (isRankingCancelled) return;
 
-            finalRanking = sortedItems.map(item => [item]); // Formato de grupo para consistência
+            finalRanking = sortedItems.map(item => [item]);
             displayResults(finalRanking);
         }
 
@@ -362,9 +378,9 @@
             let rankNumber = 1;
 
             const rankBracketColors = {
-                1: 'border-yellow-400', // Gold
-                2: 'border-gray-400',   // Silver
-                3: 'border-yellow-600', // Bronze
+                1: 'border-[#f3b640]', // Amarelo
+                2: 'border-gray-400',   // Prata
+                3: 'border-[#e55f27]', // Laranja
             };
             const defaultBracketColor = 'border-gray-300';
 
@@ -380,7 +396,7 @@
                     itemRow.className = 'p-3 flex items-center space-x-4 bg-gray-50';
                     
                     const rankEl = document.createElement('span');
-                    rankEl.className = 'text-lg font-bold text-indigo-600 w-8 text-center flex-shrink-0';
+                    rankEl.className = 'text-lg font-bold text-[#69a7b0] w-8 text-center flex-shrink-0';
                     
                     if (itemIndex === 0) {
                         rankEl.textContent = `${rankNumber}.`;
@@ -446,10 +462,10 @@
             currentMode = mode;
             document.querySelectorAll('.mode-btn').forEach(btn => {
                 if (btn.dataset.mode === mode) {
-                    btn.classList.add('bg-indigo-600', 'text-white');
+                    btn.classList.add('bg-[#e55f27]', 'text-white'); // Laranja para o modo ativo
                     btn.classList.remove('text-gray-800');
                 } else {
-                    btn.classList.remove('bg-indigo-600', 'text-white');
+                    btn.classList.remove('bg-[#e55f27]', 'text-white');
                     btn.classList.add('text-gray-800');
                 }
             });
