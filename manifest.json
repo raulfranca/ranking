@@ -1,0 +1,21 @@
+{
+  "name": "Ranking de Tudo",
+  "short_name": "Ranking",
+  "description": "Crie um ranking de qualquer lista de itens através de batalhas de pares.",
+  "start_url": "/ranking/",
+  "display": "standalone",
+  "background_color": "#f9fafb",
+  "theme_color": "#69a7b0",
+  "icons": [
+    {
+      "src": "icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
