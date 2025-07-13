@@ -1,0 +1,29 @@
+{
+  "name": "Ranking de Tudo",
+  "short_name": "Ranking",
+  "description": "Descubra o que você realmente prefere, de um jeito fácil e divertido",
+  "start_url": "/ranking/",
+  "display": "standalone",
+  "background_color": "#f9fafb",
+  "theme_color": "#69a7b0",
+  "icons": [
+    {
+      "src": "icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
